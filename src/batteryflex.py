@@ -31,9 +31,24 @@ def print_metrics(metrics, type):
     res = ""
     for metric in metrics:
         strings = metric['name'].split('_')
-        metric_name = strings[1]+'_'+strings[4][:-12]
-        uid = strings[2]+'_'+strings[3]
+        if metric['name'].startswith("solarwattBattery"):
+            metric_name = strings[1]+'_'+strings[4]
+        if metric['name'].startswith("modbus"):
+            metric_name = strings[1]+'_'+strings[2]+'_'+strings[5]
+        if metric_name.startswith("batteryflex"):
+            metric_name = metric_name[:-12]
+        if metric_name.startswith("sunspec"):
+            if metric_name.endswith("kiwios"):
+                metric_name = metric_name[:7]
+        if metric_name.startswith("batteryflex"):
+            uid = strings[2]+'_'+strings[3]
+        if metric_name.startswith("sunspec"):
+            uid = strings[3]+'_'+strings[4]
         name = strings[5]
+        if metric_name.startswith("sunspec"):
+            name = name + "_" + strings[6]
+            if len(strings) > 7:
+                name = name + "_" + strings[7]
         value = metric['state']
         vlabel = ""
 
@@ -49,6 +64,8 @@ def print_metrics(metrics, type):
 
         if isinstance(value,str):
           value = re.sub(r'[a-z°ω]','',value.lower()).strip()
+          if value == "":
+            value = "0"
 
         res = res + metric_name + '{uid="' + uid + '",name="' + name + '"'+vlabel+'} ' + '{}\n'.format(value)
 
